@@ -1,6 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const Navbar = ({ onHome, onBrowse, currentView }) => {
+const Navbar = ({ onHome, onBrowse, onSearch, currentView }) => {
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [tempQuery, setTempQuery] = useState('');
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && tempQuery.trim()) {
+            onSearch(tempQuery.trim());
+            setIsSearchOpen(false);
+            setTempQuery('');
+        }
+    };
+
     return (
         <nav className="flex items-center justify-between py-6 relative z-50">
             <div
@@ -34,13 +45,32 @@ const Navbar = ({ onHome, onBrowse, currentView }) => {
                     </button>
                 </div>
 
-                <button className="text-gray-400 hover:text-white flex items-center gap-2 transition-all px-3 py-1.5 rounded-full hover:bg-white/5">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <span className="text-sm font-medium">Search</span>
-                </button>
+                <div className="relative">
+                    <button
+                        onClick={() => setIsSearchOpen(!isSearchOpen)}
+                        className="text-gray-400 hover:text-white flex items-center gap-2 transition-all px-3 py-1.5 rounded-full hover:bg-white/5"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <span className="text-sm font-medium">Search</span>
+                    </button>
+
+                    {isSearchOpen && (
+                        <div className="absolute right-0 mt-2 p-2 bg-[#1a1a2e] border border-white/10 rounded-lg shadow-2xl animate-fadeIn">
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="Search movies or genres..."
+                                value={tempQuery}
+                                onChange={(e) => setTempQuery(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                className="bg-transparent text-white text-sm outline-none w-64 px-2 py-1"
+                            />
+                        </div>
+                    )}
+                </div>
             </div>
         </nav>
     )

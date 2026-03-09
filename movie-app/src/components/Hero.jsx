@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import { getImageUrl } from '../services/tmdb'
 
 const Hero = ({ movies = [] }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-
     const [isFading, setIsFading] = useState(false);
 
     useEffect(() => {
@@ -16,6 +16,8 @@ const Hero = ({ movies = [] }) => {
     if (!movies || movies.length === 0) return null;
 
     const currentMovie = movies[currentIndex];
+    const year = currentMovie.release_date ? currentMovie.release_date.split('-')[0] : '2024';
+    const backgroundImage = getImageUrl(currentMovie.backdrop_path, 'original');
 
     const handleNext = () => {
         setIsFading(true);
@@ -43,11 +45,24 @@ const Hero = ({ movies = [] }) => {
     };
 
     return (
-        <section className="relative py-20 flex flex-col items-start min-h-[600px] justify-center overflow-visible group/hero">
+        <section className="relative py-20 flex flex-col items-start min-h-[700px] justify-center overflow-visible group/hero">
+            {/* Background Image with Gradient Overlay */}
+            <div className={`absolute inset-0 -mx-5 sm:-mx-10 md:-mx-20 pointer-events-none transition-all duration-1000 ${isFading ? 'opacity-0 scale-105' : 'opacity-40 scale-100'}`}>
+                {backgroundImage && (
+                    <img
+                        src={backgroundImage}
+                        className="w-full h-full object-cover"
+                        alt=""
+                    />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#030014] via-[#030014]/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#030014] via-transparent to-transparent" />
+            </div>
+
             {/* Edge Navigation Arrows */}
             <button
                 onClick={handlePrev}
-                className="absolute left-[-40px] top-1/2 -translate-y-1/2 z-20 text-white/30 hover:text-white transition-all opacity-0 group-hero-hover:opacity-100 hidden md:block"
+                className="absolute left-[-40px] top-1/2 -translate-y-1/2 z-20 text-white/30 hover:text-white transition-all opacity-0 group-hero-hover/hero:opacity-100 hidden md:block"
                 aria-label="Previous slide"
             >
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -57,24 +72,13 @@ const Hero = ({ movies = [] }) => {
 
             <button
                 onClick={handleNext}
-                className="absolute right-[-40px] top-1/2 -translate-y-1/2 z-20 text-white/30 hover:text-white transition-all opacity-0 group-hero-hover:opacity-100 hidden md:block"
+                className="absolute right-[-40px] top-1/2 -translate-y-1/2 z-20 text-white/30 hover:text-white transition-all opacity-0 group-hero-hover/hero:opacity-100 hidden md:block"
                 aria-label="Next slide"
             >
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
-
-            {/* Background Graphic */}
-            <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 opacity-20 pointer-events-none transition-all duration-700 ${isFading ? 'opacity-0 scale-95' : 'opacity-20 scale-100'}`}>
-                <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto animate-pulse">
-                    <path d="M200 50 L350 150 L350 300 L200 400 L50 300 L50 150 Z" stroke="white" strokeWidth="1" strokeDasharray="4 4" />
-                    <circle cx="200" cy="225" r="80" stroke="white" strokeWidth="1" />
-                    <rect x="160" y="100" width="80" height="40" stroke="white" strokeWidth="1" />
-                    <circle cx="200" cy="190" r="30" stroke="white" strokeWidth="2" />
-                    <rect x="170" y="220" width="60" height="80" rx="10" stroke="white" strokeWidth="2" />
-                </svg>
-            </div>
 
             <div className={`relative z-10 max-w-2xl transition-all duration-300 transform ${isFading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
                 <div className="flex items-center gap-2 text-red-500 font-bold text-xs uppercase tracking-widest mb-4">
@@ -85,20 +89,22 @@ const Hero = ({ movies = [] }) => {
                     Trending Now
                 </div>
 
-                <h1 className="text-white text-6xl font-bold mb-4 !text-left !mx-0 leading-tight min-h-[140px]">
+                <h1 className="text-white text-6xl font-bold mb-4 !text-left !mx-0 leading-tight min-h-[140px] drop-shadow-2xl">
                     {currentMovie.title}
                 </h1>
 
                 <div className="flex items-center gap-4 text-gray-400 text-sm mb-6">
-                    <span>{currentMovie.year}</span>
+                    <span className="bg-white/10 px-2 py-0.5 rounded text-white">{year}</span>
                     <span>•</span>
-                    <span>{currentMovie.duration || '120 min'}</span>
+                    <span className="flex items-center gap-1 text-yellow-500 font-bold">
+                        ★ {currentMovie.vote_average?.toFixed(1)}
+                    </span>
                     <span>•</span>
-                    <span>{currentMovie.genre}</span>
+                    <span className="text-gray-300">TMDB Popular</span>
                 </div>
 
                 <p className="text-gray-300 text-lg leading-relaxed mb-8 h-24 overflow-hidden line-clamp-3">
-                    {currentMovie.description || "A captivating story that will keep you on the edge of your seat. Experience the thrill, the emotion, and the spectacle of this trending masterpiece."}
+                    {currentMovie.overview || "A captivating story that will keep you on the edge of your seat. Experience the thrill, the emotion, and the spectacle of this trending masterpiece."}
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
@@ -109,9 +115,8 @@ const Hero = ({ movies = [] }) => {
                         Watch Now
                     </button>
 
-                    {/* Dot Pagination Icons */}
                     <div className="flex items-center gap-2">
-                        {movies.map((_, index) => (
+                        {movies.slice(0, 10).map((_, index) => (
                             <button
                                 key={index}
                                 onClick={() => goToSlide(index)}
