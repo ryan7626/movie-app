@@ -4,15 +4,15 @@ import MovieCard from './MovieCard'
 const AllMovies = ({ allMovies = [], searchQuery = '' }) => {
     const [selectedGenre, setSelectedGenre] = useState('All');
 
-    // Extract unique genres
-    const genres = ['All', ...new Set(allMovies.map(movie => movie.genre))];
+    // Extract unique genres from all movies
+    const genres = ['All', ...new Set(allMovies.flatMap(movie => movie.genres || []))];
 
     // Filtering Logic
     let filteredMovies = allMovies;
 
     // 1. Apply Genre filter if selected
     if (selectedGenre !== 'All') {
-        filteredMovies = filteredMovies.filter(movie => movie.genre === selectedGenre);
+        filteredMovies = filteredMovies.filter(movie => movie.genres?.includes(selectedGenre));
     }
 
     // 2. Apply Search filter if searchQuery exists
@@ -20,7 +20,7 @@ const AllMovies = ({ allMovies = [], searchQuery = '' }) => {
         const q = searchQuery.toLowerCase();
         filteredMovies = filteredMovies.filter(movie =>
             movie.title.toLowerCase().includes(q) ||
-            movie.genre.toLowerCase().includes(q)
+            movie.genres?.some(g => g.toLowerCase().includes(q))
         );
 
         // Sort: Title matches first, then Genre matches

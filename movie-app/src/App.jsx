@@ -38,18 +38,33 @@ const App = () => {
           return acc;
         }, {});
 
-        const mapGenreNames = (movies) => movies.map(m => ({
-          ...m,
-          genre: genreMap[m.genre_ids[0]] || 'Other'
-        }));
+        const mapMovieData = (movies) => movies.map(m => {
+          const names = m.genre_ids.map(id => genreMap[id]).filter(Boolean);
+          return {
+            ...m,
+            genres: names,
+            genre: names[0] || 'Other' // Keep first for display/legacy
+          };
+        });
+
+        // Deduplicate movies for the "All" view
+        const getUniqueMovies = (movieArrays) => {
+          const combined = movieArrays.flat();
+          const seen = new Set();
+          return combined.filter(movie => {
+            if (seen.has(movie.id)) return false;
+            seen.add(movie.id);
+            return true;
+          });
+        };
 
         setMovies({
-          trending: mapGenreNames(trending),
-          sciFi: mapGenreNames(sciFi),
-          action: mapGenreNames(action),
-          horror: mapGenreNames(horror),
-          comedy: mapGenreNames(comedy),
-          all: mapGenreNames([...trending, ...sciFi, ...action, ...horror, ...comedy])
+          trending: mapMovieData(trending),
+          sciFi: mapMovieData(sciFi),
+          action: mapMovieData(action),
+          horror: mapMovieData(horror),
+          comedy: mapMovieData(comedy),
+          all: mapMovieData(getUniqueMovies([trending, sciFi, action, horror, comedy]))
         });
       } catch (error) {
         console.error("Error fetching movies:", error);
